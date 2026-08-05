@@ -1,0 +1,20 @@
+name: crypto-mid-cap-1d
+description: >
+  Mid-cap crypto spot pairs vs. USDT on Binance, daily bars.
+  Tokens ranked 10-19 by market cap (non-stable, Binance-listed),
+  complementing large-cap-1d for cross-sectional factor strategies.
+  Selection is maintained automatically via `make update-selections`.
+interval: 1d
+sources:
+  - binance:
+      symbols:
+        - XMRUSDT
+        - LINKUSDT
+        - XLMUSDT
+        - BCHUSDT
+        - GRAMUSDT
+        - LTCUSDT
+        - HBARUSDT
+        - SHIBUSDT
+        - AVAXUSDT
+        - SUIUSDT

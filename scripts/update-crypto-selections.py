@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Update crypto large-cap symbol selections using CoinGecko market cap ranking.
+"""Update crypto symbol selections using CoinGecko market cap ranking.
 
 Behaviour:
 - Queries CoinGecko for top-50 coins by market cap
 - Filters to coins with an active USDT pair on Binance
-- Selects top-N per dataset (count is read from the current YAML)
+- Excludes stablecoins (price pegged to ~1 USD)
+- Each dataset declares how many symbols it wants and which other dataset
+  to exclude (so large-cap and mid-cap don't overlap)
 - Updates crypto/*.yml symbol lists in place
 - Removes rows for dropped symbols from existing data/*.csv files
 - New symbols get full backfill on the next `make fetch`
@@ -23,11 +25,14 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 
-# (yaml_path, csv_path)
+# Each entry: (yaml_path, csv_path, exclude_yaml_path_or_None)
+# exclude_yaml: symbols already selected in that dataset are skipped here,
+# so large-cap and mid-cap never overlap.
 DATASETS = [
-    (REPO / "crypto/large-cap-1d.yml",  REPO / "data/crypto/large-cap-1d.csv"),
-    (REPO / "crypto/large-cap-4h.yml",  REPO / "data/crypto/large-cap-4h.csv"),
-    (REPO / "crypto/large-cap-1h.yml",  REPO / "data/crypto/large-cap-1h.csv"),
+    (REPO / "crypto/large-cap-1d.yml",  REPO / "data/crypto/large-cap-1d.csv",  None),
+    (REPO / "crypto/large-cap-4h.yml",  REPO / "data/crypto/large-cap-4h.csv",  None),
+    (REPO / "crypto/large-cap-1h.yml",  REPO / "data/crypto/large-cap-1h.csv",  None),
+    (REPO / "crypto/mid-cap-1d.yml",    REPO / "data/crypto/mid-cap-1d.csv",    REPO / "crypto/large-cap-1d.yml"),
 ]
 
 # ── HTTP helpers ──────────────────────────────────────────────────────────────
@@ -75,10 +80,8 @@ def read_symbols(yaml_path: Path) -> list[str]:
 def write_symbols(yaml_path: Path, symbols: list[str]) -> None:
     """Replace the symbols list in a crypto dataset YAML."""
     text = yaml_path.read_text()
-    # Build replacement block
-    indent = "        "  # 8 spaces — matches current YAML indentation
+    indent = "        "  # 8 spaces
     new_block = "      symbols:\n" + "".join(f"{indent}- {s}\n" for s in symbols)
-    # Replace from 'symbols:' line to end of list (lines starting with '        -')
     text = re.sub(
         r"      symbols:\n(?:        - \S+\n)+",
         new_block,
@@ -113,8 +116,7 @@ def main() -> None:
     binance_pairs = binance_usdt_pairs()
     print()
 
-    # Build ordered candidate list: CoinGecko rank → Binance USDT pair
-    # Exclude stablecoins (price pegged to ~1 USD) — they aren't tradeable alpha sources
+    # Build ordered candidate list: CoinGecko rank → Binance USDT pair, stablecoins excluded
     candidates: list[str] = []
     for coin in cg_coins:
         price = coin.get("current_price") or 0
@@ -130,17 +132,25 @@ def main() -> None:
 
     any_changed = False
 
-    for yaml_path, csv_path in DATASETS:
+    for yaml_path, csv_path, exclude_yaml in DATASETS:
+        # Build the available pool for this dataset (exclude symbols reserved by another)
+        excluded: set[str] = set()
+        if exclude_yaml and exclude_yaml.exists():
+            excluded = set(read_symbols(exclude_yaml))
+        pool = [s for s in candidates if s not in excluded]
+
         current = read_symbols(yaml_path)
         n = len(current)
-        new_selection = candidates[:n]
+        new_selection = pool[:n]
 
         added = [s for s in new_selection if s not in current]
         removed = [s for s in current if s not in new_selection]
 
-        print(f"{yaml_path.name}  (top-{n})")
+        label = f"top-{n}" if not excluded else f"rank {len(excluded)+1}–{len(excluded)+n}"
+        print(f"{yaml_path.name}  ({label})")
         if not added and not removed:
             print("  no changes")
+            print()
             continue
 
         any_changed = True
