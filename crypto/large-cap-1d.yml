@@ -4,6 +4,26 @@ description: >
   Covers the nine largest tokens by market cap with sufficient liquidity
   for most trend-following and cross-asset strategies.
 interval: 1d
+overlays:
+  # Trend vs. mean-reversion regime (Lo-MacKinlay variance ratio)
+  vr20: !variance_ratio { period: 20, lag: 5 }
+  # Rolling autocorrelation of returns at lag 1
+  autocorr20: !correlation
+    lhs: !roc { periods: 1 }
+    rhs: !lag { source: !roc { periods: 1 }, periods: 1 }
+    period: 20
+  # Realized volatility — Garman-Klass OHLC estimator
+  rvol20: !garman_klass { period: 20 }
+  # Fat-tail indicator: excess kurtosis of returns
+  kurt60: !kurtosis { period: 60 }
+  # BTC buy-and-hold Sharpe — broad crypto market regime
+  btc_sharpe365: !sharpe
+    strategy:
+      symbol: BTCUSDT
+      long:
+        enter: !value true
+    period: 365
+    bars_per_year: 365.0
 sources:
   - binance:
       symbols:
