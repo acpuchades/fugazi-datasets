@@ -11,7 +11,7 @@ are treated as dataset paths.
 For each dataset <category>/<name>.yml whose CSV exists under data/, this
 script produces:
 
-    dist/<category>/<name>-<VERSION>.zip
+    dist/fugazi-<category>-<name>-<VERSION>.zip
 
 The ZIP contains:
     MANIFEST        — plain text directives: version, data, overlay (if present)
@@ -50,19 +50,19 @@ def main() -> None:
     for yml in datasets:
         slug = yml.with_suffix("")          # e.g. crypto/large-cap-1d
         name = slug.name                    # e.g. large-cap-1d
+        category = slug.parent.name         # e.g. crypto
         csv = Path("data") / slug.with_suffix(".csv")
-        out = Path("dist") / slug.parent / f"{name}-{version}.zip"
+        out = Path("dist") / f"fugazi-{category}-{name}-{version}.zip"
 
         if not csv.exists():
             print(f"  skip  {slug}: CSV not found (run 'make fetch' first)")
             continue
 
-        category = slug.parent.name          # e.g. crypto
         overlay_name = f"{category}-{name}"  # e.g. crypto-large-cap-1d
         overlay_yml = Path("overlays") / f"{overlay_name}.yml"
         overlay_file = f"{overlay_name}.yml"
 
-        out.parent.mkdir(parents=True, exist_ok=True)
+        Path("dist").mkdir(parents=True, exist_ok=True)
         manifest = f"version {version}\ndata {name}.csv\n"
         if overlay_yml.exists():
             manifest += f"overlay {overlay_file}\n"
