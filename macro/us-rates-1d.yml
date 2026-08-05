@@ -7,6 +7,7 @@ interval: 1d
 sources:
   - yfinance:
       symbols:
+        - SPY   # S&P 500 benchmark (cross-market anchor)
         - SHY   # 1-3Y Treasuries
         - IEF   # 7-10Y Treasuries
         - TLT   # 20Y+ Treasuries

@@ -12,3 +12,16 @@ gld_sharpe252: !sharpe
       enter: !value true
   period: 252
   bars_per_year: 252.0
+
+corr_to_spy: !correlation
+  lhs: !roc { periods: 1 }
+  rhs: !roc { periods: 1, source: !price { source: !pick { symbol: SPY } } }
+  period: 60
+beta_to_spy: !mul
+  lhs: !correlation
+    lhs: !roc { periods: 1 }
+    rhs: !roc { periods: 1, source: !price { source: !pick { symbol: SPY } } }
+    period: 60
+  rhs: !div
+    lhs: !stddev { source: !roc { periods: 1 }, period: 60 }
+    rhs: !stddev { source: !roc { periods: 1, source: !price { source: !pick { symbol: SPY } } }, period: 60 }

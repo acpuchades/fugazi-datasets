@@ -7,6 +7,7 @@ interval: 1d
 sources:
   - yfinance:
       symbols:
+        - SPY   # S&P 500 benchmark (cross-market anchor)
         - IYW   # US Technology
         - IYF   # US Financials
         - IYH   # US Healthcare

@@ -6,6 +6,7 @@ interval: 1d
 sources:
   - yfinance:
       symbols:
+        - SPY   # S&P 500 benchmark (cross-market anchor)
         - GLD   # Gold
         - SLV   # Silver
         - USO   # Crude Oil
