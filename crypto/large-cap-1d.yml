@@ -4,6 +4,16 @@ description: >
   Covers the nine largest tokens by market cap with sufficient liquidity
   for most trend-following and cross-asset strategies.
 interval: 1d
+coingecko_ids:
+  BTCUSDT: bitcoin
+  ETHUSDT: ethereum
+  BNBUSDT: binancecoin
+  XRPUSDT: ripple
+  SOLUSDT: solana
+  TRXUSDT: tron
+  DOGEUSDT: dogecoin
+  ZECUSDT: zcash
+  ADAUSDT: cardano
 sources:
   - binance:
       symbols:

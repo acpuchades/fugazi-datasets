@@ -1,10 +1,10 @@
-name: crypto-mid-cap-1d
+name: crypto-mid-cap-4h
 description: >
-  Mid-cap crypto spot pairs vs. USDT on Binance, daily bars.
+  Mid-cap crypto spot pairs vs. USDT on Binance, 4-hour bars.
   Tokens ranked 10-19 by market cap (non-stable, Binance-listed),
-  complementing large-cap-1d for cross-sectional factor strategies.
+  complementing large-cap-4h for cross-sectional factor strategies.
   Selection is maintained automatically via `make update-selections`.
-interval: 1d
+interval: 4h
 coingecko_ids:
   XMRUSDT: monero
   LINKUSDT: chainlink

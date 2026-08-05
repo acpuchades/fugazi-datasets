@@ -3,6 +3,16 @@ description: >
   Large-cap crypto spot pairs vs. USDT on Binance, 4-hour bars.
   Same universe as large-cap-1d at higher resolution for intraday strategies.
 interval: 4h
+coingecko_ids:
+  BTCUSDT: bitcoin
+  ETHUSDT: ethereum
+  BNBUSDT: binancecoin
+  XRPUSDT: ripple
+  SOLUSDT: solana
+  TRXUSDT: tron
+  DOGEUSDT: dogecoin
+  ZECUSDT: zcash
+  ADAUSDT: cardano
 sources:
   - binance:
       symbols:
