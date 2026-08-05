@@ -1,3 +1,4 @@
+adj_price: !get { key: adj_close }
 vr20: !variance_ratio { period: 20, lag: 5 }
 autocorr20: !correlation
   lhs: !roc { periods: 1 }
