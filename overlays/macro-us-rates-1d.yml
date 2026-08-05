@@ -1,0 +1,14 @@
+vr20: !variance_ratio { period: 20, lag: 5 }
+autocorr20: !correlation
+  lhs: !roc { periods: 1 }
+  rhs: !lag { source: !roc { periods: 1 }, periods: 1 }
+  period: 20
+rvol20: !garman_klass { period: 20 }
+kurt60: !kurtosis { period: 60 }
+tlt_sharpe252: !sharpe
+  strategy:
+    symbol: TLT
+    long:
+      enter: !value true
+  period: 252
+  bars_per_year: 252.0

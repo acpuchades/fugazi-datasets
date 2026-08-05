@@ -1,0 +1,15 @@
+name: macro-us-rates-1d
+description: >
+  US fixed income ETFs across the yield curve and credit spectrum, daily bars.
+  Covers duration (short/medium/long) and credit quality (IG/HY/TIPS).
+  Essential for rate-regime detection and cross-asset macro strategies.
+interval: 1d
+sources:
+  - yfinance:
+      symbols:
+        - SHY   # 1-3Y Treasuries
+        - IEF   # 7-10Y Treasuries
+        - TLT   # 20Y+ Treasuries
+        - TIP   # TIPS (inflation-linked)
+        - LQD   # Investment-grade corporate
+        - HYG   # High-yield corporate

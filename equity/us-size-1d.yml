@@ -1,0 +1,15 @@
+name: equity-us-size-1d
+description: >
+  US equity size-factor ETFs covering large, mid and small caps, daily bars.
+  Captures the size premium directly; complements us-factors-1d and useful
+  for regime-aware factor rotation strategies.
+interval: 1d
+sources:
+  - yfinance:
+      symbols:
+        - SPY   # Large-cap (S&P 500)
+        - MDY   # Mid-cap (S&P 400)
+        - IWM   # Small-cap (Russell 2000)
+        - IJR   # Small-cap (S&P 600, more quality-screened)
+        - IWO   # Small-cap growth
+        - IWN   # Small-cap value

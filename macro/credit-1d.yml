@@ -1,0 +1,14 @@
+name: macro-credit-1d
+description: >
+  Credit-spread ETFs across investment-grade, high-yield and emerging markets,
+  daily bars. Credit spreads are a leading risk-on/risk-off indicator and
+  complement rate and equity regime signals.
+interval: 1d
+sources:
+  - yfinance:
+      symbols:
+        - LQD   # Investment-grade corporate
+        - HYG   # High-yield corporate (broad)
+        - JNK   # High-yield corporate (SPDR)
+        - EMB   # Emerging market bonds (USD)
+        - BKLN  # Leveraged loans (floating rate)

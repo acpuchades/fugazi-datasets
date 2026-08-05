@@ -1,0 +1,20 @@
+name: equity-us-industries-1d
+description: >
+  US equity industry ETFs (iShares US) at GICS industry level, daily bars.
+  More granular than GICS sectors; useful for cross-industry momentum,
+  relative-strength signals and sector-rotation strategies.
+interval: 1d
+sources:
+  - yfinance:
+      symbols:
+        - IYW   # US Technology
+        - IYF   # US Financials
+        - IYH   # US Healthcare
+        - IYE   # US Energy
+        - IYC   # US Consumer Discretionary
+        - IYK   # US Consumer Staples
+        - IYZ   # US Telecommunications
+        - IYJ   # US Industrials
+        - IYM   # US Basic Materials
+        - IDU   # US Utilities
+        - IYR   # US Real Estate
