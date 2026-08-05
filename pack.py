@@ -38,7 +38,8 @@ def _parse_args() -> tuple[str, list[Path]]:
     if paths:
         datasets = [Path(p) for p in paths]
     else:
-        datasets = sorted(Path(".").glob("*/*.yml"))
+        datasets = sorted(p for p in Path(".").glob("*/*.yml")
+                          if p.parent.name != "overlays")
     return version, datasets
 
 
