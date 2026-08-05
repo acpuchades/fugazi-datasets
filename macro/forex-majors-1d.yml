@@ -4,12 +4,12 @@ description: >
   Useful for carry strategies and macro FX trend following.
 interval: 1d
 sources:
-  - provider: yfinance
-    symbols:
-      - "EURUSD=X"
-      - "GBPUSD=X"
-      - "USDJPY=X"
-      - "AUDUSD=X"
-      - "USDCAD=X"
-      - "USDCHF=X"
-      - "NZDUSD=X"
+  - yfinance:
+      symbols:
+        - "EURUSD=X"
+        - "GBPUSD=X"
+        - "USDJPY=X"
+        - "AUDUSD=X"
+        - "USDCAD=X"
+        - "USDCHF=X"
+        - "NZDUSD=X"

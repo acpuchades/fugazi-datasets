@@ -1,17 +1,18 @@
 name: crypto-large-cap-1d
 description: >
-  Top crypto large-caps by market cap, daily bars.
-  Covers BTC, ETH and the most liquid altcoins on Binance.
+  Large-cap crypto spot pairs vs. USDT on Binance, daily bars.
+  Covers the nine largest tokens by market cap with sufficient liquidity
+  for most trend-following and cross-asset strategies.
 interval: 1d
 sources:
-  - provider: binance
-    symbols:
-      - BTCUSDT
-      - ETHUSDT
-      - SOLUSDT
-      - BNBUSDT
-      - AVAXUSDT
-      - LINKUSDT
-      - ADAUSDT
-      - DOTUSDT
-      - XRPUSDT
+  - binance:
+      symbols:
+        - BTCUSDT
+        - ETHUSDT
+        - SOLUSDT
+        - BNBUSDT
+        - AVAXUSDT
+        - LINKUSDT
+        - ADAUSDT
+        - DOTUSDT
+        - XRPUSDT

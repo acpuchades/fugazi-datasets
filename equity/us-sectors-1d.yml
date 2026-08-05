@@ -1,20 +1,21 @@
 name: equity-us-sectors-1d
 description: >
-  US equity sector ETFs (SPDR) plus SPY as benchmark, daily bars.
-  Covers all 11 GICS sectors; useful for sector rotation strategies.
+  US equity sector ETFs (SPDR / Select Sector) plus the S&P 500 benchmark,
+  daily bars. Covers all 11 GICS sectors; useful for sector rotation,
+  relative-strength and macro regime strategies.
 interval: 1d
 sources:
-  - provider: yfinance
-    symbols:
-      - SPY   # S&P 500 benchmark
-      - XLK   # Technology
-      - XLF   # Financials
-      - XLE   # Energy
-      - XLV   # Health Care
-      - XLU   # Utilities
-      - XLI   # Industrials
-      - XLP   # Consumer Staples
-      - XLY   # Consumer Discretionary
-      - XLRE  # Real Estate
-      - XLC   # Communication Services
-      - XLB   # Materials
+  - yfinance:
+      symbols:
+        - SPY   # S&P 500 benchmark
+        - XLK   # Technology
+        - XLF   # Financials
+        - XLE   # Energy
+        - XLV   # Health Care
+        - XLU   # Utilities
+        - XLI   # Industrials
+        - XLP   # Consumer Staples
+        - XLY   # Consumer Discretionary
+        - XLRE  # Real Estate
+        - XLC   # Communication Services
+        - XLB   # Materials
