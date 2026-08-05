@@ -53,7 +53,7 @@ def main() -> None:
         name = slug.name                    # e.g. large-cap-1d
         category = slug.parent.name         # e.g. crypto
         csv = Path("data") / slug.with_suffix(".csv")
-        out = Path("dist") / f"fugazi-{category}-{name}-{version}.zip"
+        out = Path("dist") / f"{category}-{name}-{version}.zip"
 
         if not csv.exists():
             print(f"  skip  {slug}: CSV not found (run 'make fetch' first)")
