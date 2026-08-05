@@ -8,8 +8,8 @@ sources:
       symbols:
         - "EURUSD=X"
         - "GBPUSD=X"
-        - "USDJPY=X"
+        - "JPY=X"
         - "AUDUSD=X"
-        - "USDCAD=X"
-        - "USDCHF=X"
+        - "CAD=X"
+        - "CHF=X"
         - "NZD=X"

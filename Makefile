@@ -15,12 +15,12 @@ data/%.csv: %.yml
 	@if [ -f $@ ]; then \
 	  last=$$(tail -n +2 $@ | awk -F',' '$$3 > max { max = $$3 } END { print max }' | cut -dT -f1); \
 	  next=$$(date -d "$$last + 1 day" +%Y-%m-%d 2>/dev/null || date -v+1d -j -f %Y-%m-%d "$$last" +%Y-%m-%d); \
-	  echo "  update $< (since $$next)"; \
-	  fugazi get --quiet @$< --since $$next -o /tmp/_fugazi_incr.csv && \
-	    tail -n +2 /tmp/_fugazi_incr.csv >> $@ || true; \
+	  printf "  update %-40s (since %s)\n" "$<" "$$next"; \
+	  out=$$(fugazi get --quiet @$< --since $$next -o /tmp/_fugazi_incr.csv 2>&1) && \
+	    tail -n +2 /tmp/_fugazi_incr.csv >> $@ || { echo "$$out" >&2; true; }; \
 	else \
-	  echo "  fetch  $<"; \
-	  fugazi get --quiet @$< -o $@; \
+	  printf "  fetch  %s\n" "$<"; \
+	  out=$$(fugazi get --quiet @$< -o $@ 2>&1) || { echo "$$out" >&2; false; }; \
 	fi
 
 ## refresh — force re-download of all CSVs from scratch
