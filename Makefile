@@ -3,7 +3,7 @@ VERSION ?= $(shell date +%Y%m%d)
 DATASETS     := $(shell find crypto equity macro -name '*.yml' | sort)
 DATA_CSVS    := $(patsubst %.yml,data/%.csv,$(DATASETS))
 
-.PHONY: all fetch refresh dist dist-fresh clean
+.PHONY: all fetch refresh update-selections dist dist-fresh clean
 
 all: dist
 
@@ -22,6 +22,10 @@ data/%.csv: %.yml
 	  printf "  fetch  %s\n" "$<"; \
 	  out=$$(fugazi get --quiet @$< -o $@ 2>&1) || { echo "$$out" >&2; false; }; \
 	fi
+
+## update-selections — refresh crypto symbol lists from CoinGecko + Binance market cap ranking
+update-selections:
+	@python3 scripts/update-crypto-selections.py
 
 ## refresh — force re-download of all CSVs from scratch
 refresh:

@@ -8,10 +8,10 @@ sources:
       symbols:
         - BTCUSDT
         - ETHUSDT
-        - SOLUSDT
         - BNBUSDT
-        - AVAXUSDT
-        - LINKUSDT
-        - ADAUSDT
-        - DOTUSDT
         - XRPUSDT
+        - SOLUSDT
+        - TRXUSDT
+        - DOGEUSDT
+        - ZECUSDT
+        - ADAUSDT
