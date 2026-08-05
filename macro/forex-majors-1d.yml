@@ -3,14 +3,6 @@ description: >
   G10 FX major pairs, daily bars (USD base or quote).
   Useful for carry strategies and macro FX trend following.
 interval: 1d
-overlays:
-  vr20: !variance_ratio { period: 20, lag: 5 }
-  autocorr20: !correlation
-    lhs: !roc { periods: 1 }
-    rhs: !lag { source: !roc { periods: 1 }, periods: 1 }
-    period: 20
-  rvol20: !garman_klass { period: 20 }
-  kurt60: !kurtosis { period: 60 }
 sources:
   - yfinance:
       symbols:

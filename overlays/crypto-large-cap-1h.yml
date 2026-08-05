@@ -1,0 +1,14 @@
+vr20: !variance_ratio { period: 20, lag: 5 }
+autocorr20: !correlation
+  lhs: !roc { periods: 1 }
+  rhs: !lag { source: !roc { periods: 1 }, periods: 1 }
+  period: 20
+rvol20: !garman_klass { period: 20 }
+kurt60: !kurtosis { period: 60 }
+btc_sharpe720: !sharpe
+  strategy:
+    symbol: BTCUSDT
+    long:
+      enter: !value true
+  period: 720
+  bars_per_year: 8760.0

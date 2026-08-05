@@ -14,8 +14,9 @@ script produces:
     dist/<category>/<name>-<VERSION>.zip
 
 The ZIP contains:
-    MANIFEST        — plain text: "version <VERSION>\\ndata <name>.csv"
+    MANIFEST        — plain text directives: version, data, overlay (if present)
     <name>.csv      — the raw candle CSV fetched by fugazi get @dataset.yml
+    <category>-<name>.yml  — overlay definitions (from overlays/<category>-<name>.yml), if present
 
 Run `make fetch` first to populate data/.
 """
@@ -55,11 +56,20 @@ def main() -> None:
             print(f"  skip  {slug}: CSV not found (run 'make fetch' first)")
             continue
 
+        category = slug.parent.name          # e.g. crypto
+        overlay_name = f"{category}-{name}"  # e.g. crypto-large-cap-1d
+        overlay_yml = Path("overlays") / f"{overlay_name}.yml"
+        overlay_file = f"{overlay_name}.yml"
+
         out.parent.mkdir(parents=True, exist_ok=True)
         manifest = f"version {version}\ndata {name}.csv\n"
+        if overlay_yml.exists():
+            manifest += f"overlay {overlay_file}\n"
         with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zf:
             zf.writestr("MANIFEST", manifest)
             zf.write(csv, f"{name}.csv")
+            if overlay_yml.exists():
+                zf.write(overlay_yml, overlay_file)
         print(f"  pack  {out}")
         ok += 1
 
