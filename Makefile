@@ -16,11 +16,11 @@ data/%.csv: %.yml
 	  last=$$(tail -n +2 $@ | awk -F',' '$$3 > max { max = $$3 } END { print max }' | cut -dT -f1); \
 	  next=$$(date -d "$$last + 1 day" +%Y-%m-%d 2>/dev/null || date -v+1d -j -f %Y-%m-%d "$$last" +%Y-%m-%d); \
 	  echo "  update $< (since $$next)"; \
-	  fugazi get @$< --since $$next -o /tmp/_fugazi_incr.csv && \
+	  fugazi get --quiet @$< --since $$next -o /tmp/_fugazi_incr.csv && \
 	    tail -n +2 /tmp/_fugazi_incr.csv >> $@ || true; \
 	else \
 	  echo "  fetch  $<"; \
-	  fugazi get @$< -o $@; \
+	  fugazi get --quiet @$< -o $@; \
 	fi
 
 ## refresh — force re-download of all CSVs from scratch
