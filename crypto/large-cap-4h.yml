@@ -1,0 +1,17 @@
+name: crypto-large-cap-4h
+description: >
+  Top crypto large-caps by market cap, 4-hour bars.
+  Same universe as large-cap-1d; useful for intraday momentum strategies.
+interval: 4h
+sources:
+  - provider: binance
+    symbols:
+      - BTCUSDT
+      - ETHUSDT
+      - SOLUSDT
+      - BNBUSDT
+      - AVAXUSDT
+      - LINKUSDT
+      - ADAUSDT
+      - DOTUSDT
+      - XRPUSDT

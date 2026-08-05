@@ -1,0 +1,16 @@
+name: macro-commodities-1d
+description: >
+  Commodity ETFs across metals, energy and agriculture, daily bars.
+  Useful for inflation regime strategies and cross-asset diversification.
+interval: 1d
+sources:
+  - provider: yfinance
+    symbols:
+      - GLD   # Gold
+      - SLV   # Silver
+      - USO   # Crude Oil
+      - UNG   # Natural Gas
+      - DBA   # Agriculture (broad)
+      - PDBC  # Diversified commodities (Invesco)
+      - CORN  # Corn
+      - WEAT  # Wheat

@@ -1,0 +1,16 @@
+name: macro-global-indices-1d
+description: >
+  Major global equity indices plus emerging markets, daily bars.
+  Useful for cross-market momentum and macro regime strategies.
+interval: 1d
+sources:
+  - provider: yfinance
+    symbols:
+      - "^GSPC"  # S&P 500
+      - "^NDX"   # Nasdaq 100
+      - "^FTSE"  # FTSE 100
+      - "^GDAXI" # DAX
+      - "^N225"  # Nikkei 225
+      - "^HSI"   # Hang Seng
+      - "^BVSP"  # Bovespa
+      - EEM      # Emerging Markets ETF (iShares)

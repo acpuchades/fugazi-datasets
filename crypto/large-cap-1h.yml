@@ -1,0 +1,14 @@
+name: crypto-large-cap-1h
+description: >
+  Core liquid crypto large-caps, hourly bars.
+  Restricted to the five most liquid Binance perpetuals to keep
+  data volume manageable at 1h resolution.
+interval: 1h
+sources:
+  - provider: binance
+    symbols:
+      - BTCUSDT
+      - ETHUSDT
+      - SOLUSDT
+      - BNBUSDT
+      - XRPUSDT

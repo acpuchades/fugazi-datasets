@@ -1,0 +1,16 @@
+name: equity-us-factors-1d
+description: >
+  US equity factor ETFs (iShares + MSCI), daily bars.
+  Covers the canonical Fama-French factors plus quality and low-vol;
+  useful for factor timing and risk decomposition.
+interval: 1d
+sources:
+  - provider: yfinance
+    symbols:
+      - MTUM  # Momentum
+      - VLUE  # Value
+      - QUAL  # Quality
+      - USMV  # Min Volatility
+      - SIZE  # Size
+      - IWF   # Growth (Russell 1000 Growth)
+      - IWD   # Value (Russell 1000 Value)

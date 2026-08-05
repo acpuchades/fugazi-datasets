@@ -1,0 +1,15 @@
+name: macro-forex-majors-1d
+description: >
+  G10 FX major pairs, daily bars (USD base or quote).
+  Useful for carry strategies and macro FX trend following.
+interval: 1d
+sources:
+  - provider: yfinance
+    symbols:
+      - "EURUSD=X"
+      - "GBPUSD=X"
+      - "USDJPY=X"
+      - "AUDUSD=X"
+      - "USDCAD=X"
+      - "USDCHF=X"
+      - "NZDUSD=X"
