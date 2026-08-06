@@ -8,14 +8,14 @@ Behaviour:
 - Each dataset declares how many symbols it wants and which other dataset
   to exclude (so large-cap and mid-cap don't overlap)
 - Updates crypto/*.yml symbol lists in place
-- Removes rows for dropped symbols from existing data/*.csv files
-- New symbols get full backfill on the next `make fetch`
 
-The YAML and each data CSV are always in sync; older dataset versions
-already uploaded to fugazi-web serve as the historical archive.
+Rewriting a YAML is the whole job: `make fetch` downloads a dataset whole
+rather than incrementally, and make sees the newer mtime, so the next fetch
+backfills the symbols that arrived and drops the ones that left without this
+script having to touch data/ at all. Older dataset versions already uploaded to
+fugazi-web serve as the historical archive.
 """
 
-import csv
 import json
 import re
 import sys
@@ -25,14 +25,14 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 
-# Each entry: (yaml_path, csv_path, exclude_yaml_path_or_None)
+# Each entry: (yaml_path, exclude_yaml_path_or_None)
 # exclude_yaml: symbols already selected in that dataset are skipped here,
 # so large-cap and mid-cap never overlap.
 DATASETS = [
-    (REPO / "crypto/large-cap-1d.yml",  REPO / "data/crypto/large-cap-1d.csv",  None),
-    (REPO / "crypto/large-cap-4h.yml",  REPO / "data/crypto/large-cap-4h.csv",  None),
-    (REPO / "crypto/large-cap-1h.yml",  REPO / "data/crypto/large-cap-1h.csv",  None),
-    (REPO / "crypto/mid-cap-1d.yml",    REPO / "data/crypto/mid-cap-1d.csv",    REPO / "crypto/large-cap-1d.yml"),
+    (REPO / "crypto/large-cap-1d.yml",  None),
+    (REPO / "crypto/large-cap-4h.yml",  None),
+    (REPO / "crypto/large-cap-1h.yml",  None),
+    (REPO / "crypto/mid-cap-1d.yml",    REPO / "crypto/large-cap-1d.yml"),
 ]
 
 # ── HTTP helpers ──────────────────────────────────────────────────────────────
@@ -89,25 +89,6 @@ def write_symbols(yaml_path: Path, symbols: list[str]) -> None:
     )
     yaml_path.write_text(text)
 
-# ── CSV manipulation ──────────────────────────────────────────────────────────
-
-def filter_csv(csv_path: Path, keep: set[str]) -> int:
-    """Remove rows for symbols not in keep. Returns number of rows removed."""
-    if not csv_path.exists():
-        return 0
-    with csv_path.open(newline="") as f:
-        reader = csv.DictReader(f)
-        fieldnames = reader.fieldnames or []
-        rows = list(reader)
-    kept = [r for r in rows if r["symbol"] in keep]
-    removed = len(rows) - len(kept)
-    if removed:
-        with csv_path.open("w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
-            writer.writeheader()
-            writer.writerows(kept)
-    return removed
-
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -132,7 +113,7 @@ def main() -> None:
 
     any_changed = False
 
-    for yaml_path, csv_path, exclude_yaml in DATASETS:
+    for yaml_path, exclude_yaml in DATASETS:
         # Build the available pool for this dataset (exclude symbols reserved by another)
         excluded: set[str] = set()
         if exclude_yaml and exclude_yaml.exists():
@@ -160,19 +141,11 @@ def main() -> None:
             print(f"  - {', '.join(removed)}")
 
         write_symbols(yaml_path, new_selection)
-
-        if removed and csv_path.exists():
-            n_rows = filter_csv(csv_path, set(new_selection))
-            if n_rows:
-                print(f"  removed {n_rows} rows from {csv_path.name}")
-
-        if added:
-            print(f"  → new symbols will be backfilled by `make fetch`")
-
+        print(f"  → `make fetch` will redownload this dataset")
         print()
 
     if any_changed:
-        print("Done. Run `make fetch` to backfill new symbols, then `make dist` to package.")
+        print("Done. Run `make fetch` to redownload the changed datasets, then `make dist` to package.")
     else:
         print("Done. Selection is already up to date.")
 

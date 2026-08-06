@@ -3,7 +3,7 @@ VERSION ?= $(shell date +%Y%m%d)
 DATASETS     := $(shell find crypto equity macro -name '*.yml' | sort)
 DATA_CSVS    := $(patsubst %.yml,data/%.csv,$(DATASETS))
 
-.PHONY: all fetch fetch-cg refresh repair update-selections dist dist-fresh clean
+.PHONY: all fetch fetch-cg refresh update-selections dist dist-fresh clean
 
 ## all — package existing CSVs; fetches first if nothing has been downloaded yet
 all:
@@ -12,11 +12,14 @@ all:
 	fi
 	@$(MAKE) --no-print-directory dist
 
-## fetch — download only missing or YAML-changed CSVs; update existing ones incrementally
+## fetch — download the CSVs whose dataset YAML is newer, or missing entirely
 fetch: $(DATA_CSVS)
 
+# Each fetch downloads the dataset whole, so a CSV is always exactly what its
+# YAML declares. `refresh` below is the way to redownload one that is merely
+# stale in wall-clock terms, since make can't see that from mtimes.
 data/%.csv: %.yml
-	@python3 scripts/merge-incremental.py $< $@
+	@python3 scripts/fetch-dataset.py $< $@
 
 ## update-selections — refresh crypto symbol lists from CoinGecko + Binance market cap ranking
 update-selections:
@@ -25,10 +28,6 @@ update-selections:
 ## fetch-cg — download CoinGecko daily overlay data (market_cap, price, volume, supply) for crypto datasets
 fetch-cg:
 	@python3 scripts/fetch-cg-overlays.py
-
-## repair — drop duplicate and in-progress bars from existing CSVs, without fetching
-repair:
-	@python3 scripts/merge-incremental.py --repair $(wildcard $(DATA_CSVS))
 
 ## refresh — force re-download of all CSVs from scratch
 refresh:
