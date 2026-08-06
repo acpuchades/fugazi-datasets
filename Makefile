@@ -5,7 +5,12 @@ DATA_CSVS    := $(patsubst %.yml,data/%.csv,$(DATASETS))
 
 .PHONY: all fetch fetch-cg refresh update-selections dist dist-fresh clean
 
-all: dist
+## all — package existing CSVs; fetches first if nothing has been downloaded yet
+all:
+	@if [ -z "$$(find data -name '*.csv' -print -quit 2>/dev/null)" ]; then \
+	  $(MAKE) --no-print-directory fetch; \
+	fi
+	@$(MAKE) --no-print-directory dist
 
 ## fetch — download only missing or YAML-changed CSVs; update existing ones incrementally
 fetch: $(DATA_CSVS)
