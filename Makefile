@@ -3,7 +3,7 @@ VERSION ?= $(shell date +%Y%m%d)
 DATASETS     := $(shell find crypto equity macro -name '*.yml' | sort)
 DATA_CSVS    := $(patsubst %.yml,data/%.csv,$(DATASETS))
 
-.PHONY: all fetch fetch-cg refresh update-selections dist dist-fresh clean
+.PHONY: all fetch fetch-cg refresh repair update-selections dist dist-fresh clean
 
 ## all — package existing CSVs; fetches first if nothing has been downloaded yet
 all:
@@ -16,17 +16,7 @@ all:
 fetch: $(DATA_CSVS)
 
 data/%.csv: %.yml
-	@mkdir -p $(dir $@)
-	@if [ -f $@ ]; then \
-	  last=$$(tail -n +2 $@ | awk -F',' '$$3 > max { max = $$3 } END { print max }' | cut -dT -f1); \
-	  next=$$(date -d "$$last + 1 day" +%Y-%m-%d 2>/dev/null || date -v+1d -j -f %Y-%m-%d "$$last" +%Y-%m-%d); \
-	  printf "  update %-40s (since %s)\n" "$<" "$$next"; \
-	  out=$$(fugazi get --quiet @$< --since $$next -o /tmp/_fugazi_incr.csv 2>&1) && \
-	    tail -n +2 /tmp/_fugazi_incr.csv >> $@ || { echo "$$out" >&2; true; }; \
-	else \
-	  printf "  fetch  %s\n" "$<"; \
-	  out=$$(fugazi get --quiet @$< -o $@ 2>&1) || { echo "$$out" >&2; false; }; \
-	fi
+	@python3 scripts/merge-incremental.py $< $@
 
 ## update-selections — refresh crypto symbol lists from CoinGecko + Binance market cap ranking
 update-selections:
@@ -35,6 +25,10 @@ update-selections:
 ## fetch-cg — download CoinGecko daily overlay data (market_cap, price, volume, supply) for crypto datasets
 fetch-cg:
 	@python3 scripts/fetch-cg-overlays.py
+
+## repair — drop duplicate and in-progress bars from existing CSVs, without fetching
+repair:
+	@python3 scripts/merge-incremental.py --repair $(wildcard $(DATA_CSVS))
 
 ## refresh — force re-download of all CSVs from scratch
 refresh:
