@@ -1,0 +1,191 @@
+name: Datasets
+
+# Rebuilds every dataset from scratch and publishes the archives as a dated
+# release. There is no incremental path and no state carried between runs: a
+# release is a self-contained snapshot, and the run that produced it is
+# reproducible from the repo at that commit plus the pinned fugazi version.
+on:
+  schedule:
+    # Sundays, 06:00 UTC — after Friday's US equity close has settled and
+    # outside the Monday open, so no session is mid-flight for the daily sets.
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, YYYYMMDD (defaults to the run's UTC date)"
+        required: false
+
+# Needed to push the selection commit and to create the release.
+permissions:
+  contents: write
+
+# Never let two runs fetch and publish at once; a queued manual run waits for
+# the scheduled one rather than racing it to the same tag.
+concurrency:
+  group: datasets
+  cancel-in-progress: false
+
+env:
+  # Pinned rather than floating: scripts/fetch-dataset.py depends on the
+  # per-series dedup added in 0.32.1, and the pin doubles as the cache key, so
+  # the CLI is only rebuilt when this line changes.
+  FUGAZI_VERSION: "0.32.1"
+
+jobs:
+  publish:
+    name: Fetch, package and release
+    runs-on: ubuntu-latest
+    # A cold run downloads every dataset's full history, including the hourly
+    # crypto sets back to their listing dates.
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install Python dependencies
+        run: pip install pyyaml
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # `cargo install` from source takes minutes; the built binary is the only
+      # thing worth keeping, so cache it directly instead of the build tree.
+      - name: Restore the fugazi CLI
+        id: fugazi-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cargo/bin/fugazi
+          key: fugazi-${{ env.FUGAZI_VERSION }}-${{ runner.os }}
+      - name: Install the fugazi CLI
+        if: steps.fugazi-cache.outputs.cache-hit != 'true'
+        run: cargo install fugazi --version "$FUGAZI_VERSION" --locked
+      - name: Report the fugazi version
+        run: fugazi --version
+
+      - name: Resolve version
+        id: version
+        # Read through the environment rather than interpolating the input into
+        # the script body, which would splice arbitrary text into the shell.
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          version="$INPUT_VERSION"
+          [ -n "$version" ] || version=$(date -u +%Y%m%d)
+          # pack.py only treats its first argument as a version when it is all
+          # digits, and silently reads it as a dataset path otherwise.
+          case "$version" in
+            '' | *[!0-9]*) echo "::error::version must be all digits: $version"; exit 1 ;;
+          esac
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Update crypto selections
+        run: make update-selections
+
+      # The selection script rewrites `symbols:` but never `coingecko_ids:`, so
+      # a token rotating in leaves its CoinGecko overlay column empty until the
+      # mapping is filled in by hand. Warn rather than fail: the overlays are
+      # supplementary, and a missing one shouldn't cost the whole release.
+      - name: Check CoinGecko id coverage
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          import yaml
+
+          for path in sorted(pathlib.Path("crypto").glob("*.yml")):
+              spec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+              ids = set(spec.get("coingecko_ids") or {})
+              if not ids:
+                  continue
+              symbols = {
+                  s
+                  for source in spec.get("sources") or []
+                  for value in source.values()
+                  for s in (value.get("symbols") or [])
+              }
+              gap = sorted(symbols - ids)
+              if gap:
+                  print(
+                      f"::warning file={path}::no coingecko_ids entry for "
+                      f"{', '.join(gap)} — the -cg overlay will omit them"
+                  )
+          PY
+
+      # Committing keeps the repo describing exactly what was published: the
+      # release archives are built from these YAMLs, and the commit diff is the
+      # record of which tokens entered and left the index.
+      - name: Commit selection changes
+        run: |
+          if git diff --quiet -- crypto; then
+            echo "selection unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data: update crypto selections (${{ steps.version.outputs.value }})" -- crypto
+          git push
+
+      # `-k` so one provider having a bad morning doesn't hide how the other
+      # sixteen datasets did; the gate below decides whether to publish.
+      - name: Fetch datasets
+        run: make -k fetch || echo "::warning::one or more datasets failed to fetch"
+
+      # Every release is a full snapshot, so a partial one silently drops a
+      # dataset for that version. Fail instead, and re-run once the provider
+      # recovers — nothing is lost, since the next run refetches from scratch.
+      - name: Require a complete set
+        run: |
+          missing=""
+          for yml in $(find crypto equity macro -name '*.yml' | sort); do
+            csv="data/${yml%.yml}.csv"
+            [ -f "$csv" ] || missing="$missing $yml"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::no CSV was produced for:$missing"
+            exit 1
+          fi
+
+      # Best-effort: fetch-cg-overlays.py reports a failed dataset on stderr and
+      # still exits 0, so check for the files it should have written.
+      - name: Fetch CoinGecko overlays
+        run: |
+          make fetch-cg
+          python3 - <<'PY'
+          import pathlib
+          import yaml
+
+          for path in sorted(pathlib.Path("crypto").glob("*.yml")):
+              spec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+              if not (spec.get("coingecko_ids") or {}):
+                  continue
+              out = pathlib.Path("data") / path.parent.name / f"{path.stem}-cg.csv"
+              if not out.exists():
+                  print(f"::warning file={path}::no overlay written to {out}")
+          PY
+
+      - name: Package archives
+        run: make dist VERSION=${{ steps.version.outputs.value }}
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          {
+            echo "Full snapshot of every dataset, packaged for upload to fugazi-web."
+            echo "Fetched with fugazi $FUGAZI_VERSION on $(date -u +%Y-%m-%d)."
+            echo
+            echo "| Dataset | Bars | Archive |"
+            echo "| --- | ---: | --- |"
+            for csv in $(find data -name '*.csv' ! -name '*-cg.csv' | sort); do
+              slug=${csv#data/}; slug=${slug%.csv}
+              rows=$(( $(wc -l < "$csv") - 1 ))
+              printf '| `%s` | %s | `%s` |\n' "$slug" "$rows" "${slug//\//-}-$VERSION.zip"
+            done
+          } > release-notes.md
+          # Target the commit the archives were actually built from, which is
+          # the selection commit above when there was one.
+          gh release create "v$VERSION" dist/*.zip \
+            --title "Datasets $VERSION" \
+            --notes-file release-notes.md \
+            --target "$(git rev-parse HEAD)"
