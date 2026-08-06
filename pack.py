@@ -15,12 +15,11 @@ script produces:
 
 The ZIP contains:
     MANIFEST              — plain text directives: version, name, description,
-                            data, overlay, cgdata (if present)
+                            data, overlay (if present)
     <name>.csv            — the raw candle CSV fetched by fugazi get @dataset.yml
     <category>-<name>.yml — overlay definitions (from overlays/<category>-<name>.yml), if present
-    <name>-cg.csv         — CoinGecko overlay data (market_cap, price, volume, supply), if present
 
-Run `make fetch` first to populate data/, and `make fetch-cg` for CoinGecko data.
+Run `make fetch` first to populate data/.
 """
 import sys
 import zipfile
@@ -83,9 +82,6 @@ def main() -> None:
         overlay_yml = Path("overlays") / f"{overlay_name}.yml"
         overlay_file = f"{overlay_name}.yml"
 
-        cg_csv = Path("data") / slug.parent / f"{name}-cg.csv"
-        cg_file = f"{name}-cg.csv"
-
         ds_name, ds_description = _read_meta(yml)
 
         Path("dist").mkdir(parents=True, exist_ok=True)
@@ -96,21 +92,12 @@ def main() -> None:
         manifest += f"data {name}.csv\n"
         if overlay_yml.exists():
             manifest += f"overlay {overlay_file}\n"
-        if cg_csv.exists():
-            manifest += f"cgdata {cg_file}\n"
         with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zf:
             zf.writestr("MANIFEST", manifest)
             zf.write(csv, f"{name}.csv")
             if overlay_yml.exists():
                 zf.write(overlay_yml, overlay_file)
-            if cg_csv.exists():
-                zf.write(cg_csv, cg_file)
-        extras = []
-        if overlay_yml.exists():
-            extras.append("overlay")
-        if cg_csv.exists():
-            extras.append("cgdata")
-        suffix = f"  [{', '.join(extras)}]" if extras else ""
+        suffix = "  [overlay]" if overlay_yml.exists() else ""
         print(f"  pack  {out}{suffix}")
         ok += 1
 

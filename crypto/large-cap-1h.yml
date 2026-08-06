@@ -3,12 +3,6 @@ description: >
   Top-5 crypto spot pairs vs. USDT on Binance, 1-hour bars.
   Reduced universe for hourly strategies where download volume matters.
 interval: 1h
-coingecko_ids:
-  BTCUSDT: bitcoin
-  ETHUSDT: ethereum
-  SOLUSDT: solana
-  BNBUSDT: binancecoin
-  XRPUSDT: ripple
 sources:
   - binance:
       symbols:

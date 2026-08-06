@@ -3,7 +3,7 @@ VERSION ?= $(shell date +%Y%m%d)
 DATASETS     := $(shell find crypto equity macro -name '*.yml' | sort)
 DATA_CSVS    := $(patsubst %.yml,data/%.csv,$(DATASETS))
 
-.PHONY: all fetch fetch-cg refresh update-selections dist dist-fresh clean
+.PHONY: all fetch refresh update-selections dist dist-fresh clean
 
 ## all — package existing CSVs; fetches first if nothing has been downloaded yet
 all:
@@ -24,10 +24,6 @@ data/%.csv: %.yml
 ## update-selections — refresh crypto symbol lists from CoinGecko + Binance market cap ranking
 update-selections:
 	@python3 scripts/update-crypto-selections.py
-
-## fetch-cg — download CoinGecko daily overlay data (market_cap, price, volume, supply) for crypto datasets
-fetch-cg:
-	@python3 scripts/fetch-cg-overlays.py
 
 ## refresh — force re-download of all CSVs from scratch
 refresh:

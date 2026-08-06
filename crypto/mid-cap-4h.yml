@@ -5,17 +5,6 @@ description: >
   complementing large-cap-4h for cross-sectional factor strategies.
   Selection is maintained automatically via `make update-selections`.
 interval: 4h
-coingecko_ids:
-  XMRUSDT: monero
-  LINKUSDT: chainlink
-  XLMUSDT: stellar
-  BCHUSDT: bitcoin-cash
-  GRAMUSDT: the-open-network
-  LTCUSDT: litecoin
-  HBARUSDT: hedera-hashgraph
-  SHIBUSDT: shiba-inu
-  AVAXUSDT: avalanche-2
-  SUIUSDT: sui
 sources:
   - binance:
       symbols:

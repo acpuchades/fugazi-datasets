@@ -82,35 +82,6 @@ jobs:
       - name: Update crypto selections
         run: make update-selections
 
-      # The selection script rewrites `symbols:` but never `coingecko_ids:`, so
-      # a token rotating in leaves its CoinGecko overlay column empty until the
-      # mapping is filled in by hand. Warn rather than fail: the overlays are
-      # supplementary, and a missing one shouldn't cost the whole release.
-      - name: Check CoinGecko id coverage
-        run: |
-          python3 - <<'PY'
-          import pathlib
-          import yaml
-
-          for path in sorted(pathlib.Path("crypto").glob("*.yml")):
-              spec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-              ids = set(spec.get("coingecko_ids") or {})
-              if not ids:
-                  continue
-              symbols = {
-                  s
-                  for source in spec.get("sources") or []
-                  for value in source.values()
-                  for s in (value.get("symbols") or [])
-              }
-              gap = sorted(symbols - ids)
-              if gap:
-                  print(
-                      f"::warning file={path}::no coingecko_ids entry for "
-                      f"{', '.join(gap)} — the -cg overlay will omit them"
-                  )
-          PY
-
       # Committing keeps the repo describing exactly what was published: the
       # release archives are built from these YAMLs, and the commit diff is the
       # record of which tokens entered and left the index.
@@ -126,7 +97,7 @@ jobs:
           git push
 
       # `-k` so one provider having a bad morning doesn't hide how the other
-      # sixteen datasets did; the gate below decides whether to publish.
+      # fourteen datasets did; the gate below decides whether to publish.
       - name: Fetch datasets
         run: make -k fetch || echo "::warning::one or more datasets failed to fetch"
 
@@ -145,24 +116,6 @@ jobs:
             exit 1
           fi
 
-      # Best-effort: fetch-cg-overlays.py reports a failed dataset on stderr and
-      # still exits 0, so check for the files it should have written.
-      - name: Fetch CoinGecko overlays
-        run: |
-          make fetch-cg
-          python3 - <<'PY'
-          import pathlib
-          import yaml
-
-          for path in sorted(pathlib.Path("crypto").glob("*.yml")):
-              spec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-              if not (spec.get("coingecko_ids") or {}):
-                  continue
-              out = pathlib.Path("data") / path.parent.name / f"{path.stem}-cg.csv"
-              if not out.exists():
-                  print(f"::warning file={path}::no overlay written to {out}")
-          PY
-
       - name: Package archives
         run: make dist VERSION=${{ steps.version.outputs.value }}
 
@@ -177,7 +130,7 @@ jobs:
             echo
             echo "| Dataset | Bars | Archive |"
             echo "| --- | ---: | --- |"
-            for csv in $(find data -name '*.csv' ! -name '*-cg.csv' | sort); do
+            for csv in $(find data -name '*.csv' | sort); do
               slug=${csv#data/}; slug=${slug%.csv}
               rows=$(( $(wc -l < "$csv") - 1 ))
               printf '| `%s` | %s | `%s` |\n' "$slug" "$rows" "${slug//\//-}-$VERSION.zip"
