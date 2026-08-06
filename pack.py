@@ -14,7 +14,8 @@ script produces:
     dist/fugazi-<category>-<name>-<VERSION>.zip
 
 The ZIP contains:
-    MANIFEST              — plain text directives: version, data, overlay, cgdata (if present)
+    MANIFEST              — plain text directives: version, name, description,
+                            data, overlay, cgdata (if present)
     <name>.csv            — the raw candle CSV fetched by fugazi get @dataset.yml
     <category>-<name>.yml — overlay definitions (from overlays/<category>-<name>.yml), if present
     <name>-cg.csv         — CoinGecko overlay data (market_cap, price, volume, supply), if present
@@ -25,6 +26,25 @@ import sys
 import zipfile
 import datetime
 from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    sys.exit("pyyaml is required: pip install pyyaml")
+
+
+def _read_meta(yml: Path) -> tuple[str | None, str | None]:
+    """Pull the top-level `name` and `description` out of a dataset YAML.
+
+    MANIFEST is line-based, so a folded/literal block description is collapsed
+    onto a single line.
+    """
+    spec = yaml.safe_load(yml.read_text(encoding="utf-8")) or {}
+    name = spec.get("name")
+    description = spec.get("description")
+    if description:
+        description = " ".join(str(description).split())
+    return name, description
 
 
 def _parse_args() -> tuple[str, list[Path]]:
@@ -66,8 +86,14 @@ def main() -> None:
         cg_csv = Path("data") / slug.parent / f"{name}-cg.csv"
         cg_file = f"{name}-cg.csv"
 
+        ds_name, ds_description = _read_meta(yml)
+
         Path("dist").mkdir(parents=True, exist_ok=True)
-        manifest = f"version {version}\ndata {name}.csv\n"
+        manifest = f"version {version}\n"
+        manifest += f"name {ds_name or overlay_name}\n"
+        if ds_description:
+            manifest += f"description {ds_description}\n"
+        manifest += f"data {name}.csv\n"
         if overlay_yml.exists():
             manifest += f"overlay {overlay_file}\n"
         if cg_csv.exists():
