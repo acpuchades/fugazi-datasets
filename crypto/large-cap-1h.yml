@@ -4,7 +4,7 @@ description: >
   Reduced universe for hourly strategies where download volume matters.
 interval: 1h
 sources:
-  - binance:
+  - binance-vision:
       symbols:
         - BTCUSDT
         - ETHUSDT
