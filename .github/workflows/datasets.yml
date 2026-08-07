@@ -27,11 +27,11 @@ concurrency:
 
 env:
   # Pinned rather than floating, and the pin doubles as the cache key, so the
-  # CLI is only rebuilt when this line changes. 0.33.0 is the floor for three
+  # CLI is only rebuilt when this line changes. 0.34.0 is the floor for three
   # reasons: the per-series dedup from 0.32.1, the `binance-vision` provider the
   # crypto datasets fetch through, and the removal of the `OUT=QUERY` remap that
   # let macro/forex-majors-1d go back to writing `EURUSD=X` unescaped.
-  FUGAZI_VERSION: "0.33.0"
+  FUGAZI_VERSION: "0.34.0"
 
 jobs:
   publish:
