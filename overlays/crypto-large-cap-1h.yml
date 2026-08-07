@@ -12,3 +12,10 @@ btc_sharpe720: !sharpe
       enter: !value true
   period: 720
   bars_per_year: 8760.0
+
+# ── binance-vision spot side channels ─────────────────────────────────────────
+# The kline's own order-flow extras, read here via !get. Nothing derivative:
+# these are properties of the spot bar itself.
+taker_buy_frac: !div { lhs: !get { key: taker_buy_base_volume }, rhs: !volume }
+avg_trade_size: !div { lhs: !volume, rhs: !get { key: n_trades } }
+bar_vwap: !div { lhs: !get { key: quote_volume }, rhs: !volume }

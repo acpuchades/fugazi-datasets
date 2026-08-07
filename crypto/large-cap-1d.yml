@@ -5,7 +5,7 @@ description: >
   for most trend-following and cross-asset strategies.
 interval: 1d
 sources:
-  - binance:
+  - binance-vision:
       symbols:
         - BTCUSDT
         - ETHUSDT
