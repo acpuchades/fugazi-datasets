@@ -12,13 +12,3 @@ btc_sharpe180: !sharpe
       enter: !value true
   period: 180
   bars_per_year: 2190.0
-
-# ── binance-vision side channels ──────────────────────────────────────────────
-# Order flow, carry, open interest and positioning, from the futures/kline
-# metrics binance-vision surfaces as overlay columns (read here via !get).
-# Windows are in bars (4h): ~8d carry, ~30d normalisation (6 bars/day).
-taker_buy_frac: !div { lhs: !get { key: taker_buy_base_volume }, rhs: !volume }
-funding_mean48: !sma { source: !get { key: funding_rate }, period: 48 }
-oi_roc30: !roc { source: !get { key: open_interest }, periods: 30 }
-oi_z180: !zscore { source: !get { key: open_interest }, period: 180 }
-ls_z180: !zscore { source: !get { key: long_short_ratio }, period: 180 }

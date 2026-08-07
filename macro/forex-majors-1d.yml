@@ -6,10 +6,10 @@ interval: 1d
 sources:
   - yfinance:
       symbols:
-        - 'EURUSD\=X'
-        - 'GBPUSD\=X'
-        - 'JPY\=X'
-        - 'AUDUSD\=X'
-        - 'CAD\=X'
-        - 'CHF\=X'
-        - 'NZD\=X'
+        - "EURUSD=X"
+        - "GBPUSD=X"
+        - "JPY=X"
+        - "AUDUSD=X"
+        - "CAD=X"
+        - "CHF=X"
+        - "NZD=X"

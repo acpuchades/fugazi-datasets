@@ -4,7 +4,7 @@ description: >
   Same universe as large-cap-1d at higher resolution for intraday strategies.
 interval: 4h
 sources:
-  - binance-vision:
+  - binance:
       symbols:
         - BTCUSDT
         - ETHUSDT
