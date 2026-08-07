@@ -14,8 +14,9 @@ script produces:
     dist/fugazi-<category>-<name>-<VERSION>.zip
 
 The ZIP contains:
-    MANIFEST              — plain text directives: version, name, description,
-                            data, overlay (if present)
+    MANIFEST              — plain text directives: VERSION, NAME, DESCRIPTION,
+                            DATA, OVERLAY (if present). fugazi-web matches the
+                            keyword case-insensitively; uppercase is canonical.
     <name>.csv            — the raw candle CSV fetched by fugazi get @dataset.yml
     <category>-<name>.yml — overlay definitions (from overlays/<category>-<name>.yml), if present
 
@@ -85,13 +86,13 @@ def main() -> None:
         ds_name, ds_description = _read_meta(yml)
 
         Path("dist").mkdir(parents=True, exist_ok=True)
-        manifest = f"version {version}\n"
-        manifest += f"name {ds_name or overlay_name}\n"
+        manifest = f"VERSION {version}\n"
+        manifest += f"NAME {ds_name or overlay_name}\n"
         if ds_description:
-            manifest += f"description {ds_description}\n"
-        manifest += f"data {name}.csv\n"
+            manifest += f"DESCRIPTION {ds_description}\n"
+        manifest += f"DATA {name}.csv\n"
         if overlay_yml.exists():
-            manifest += f"overlay {overlay_file}\n"
+            manifest += f"OVERLAY {overlay_file}\n"
         with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zf:
             zf.writestr("MANIFEST", manifest)
             zf.write(csv, f"{name}.csv")
