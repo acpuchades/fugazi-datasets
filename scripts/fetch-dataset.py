@@ -16,8 +16,9 @@ bar lands on a whole minute, so a non-zero seconds field marks one — and left 
 the file it reads as a closed session at a price that was never a close.
 
 Duplicate `(symbol, freq, time)` rows inside a single response — Yahoo FX
-summer-time bars that landed in two adjacent fetch chunks — were a second such
-defect, fixed upstream in fugazi 0.32.1. Requires that version.
+summer-time bars returned on both sides of a pagination boundary — were a second
+such defect, since fixed upstream. The CLI version this is built against is
+pinned in `.github/workflows/datasets.yml`, which is the one place to change it.
 """
 
 import argparse
