@@ -15,13 +15,13 @@ tlt_sharpe252: !sharpe
 
 corr_to_spy: !correlation
   lhs: !roc { periods: 1 }
-  rhs: !roc { periods: 1, source: !price { source: !pick { symbol: SPY } } }
+  rhs: !roc { periods: 1, source: !close { source: !pick { symbol: SPY } } }
   period: 60
 beta_to_spy: !mul
   lhs: !correlation
     lhs: !roc { periods: 1 }
-    rhs: !roc { periods: 1, source: !price { source: !pick { symbol: SPY } } }
+    rhs: !roc { periods: 1, source: !close { source: !pick { symbol: SPY } } }
     period: 60
   rhs: !div
     lhs: !stddev { source: !roc { periods: 1 }, period: 60 }
-    rhs: !stddev { source: !roc { periods: 1, source: !price { source: !pick { symbol: SPY } } }, period: 60 }
+    rhs: !stddev { source: !roc { periods: 1, source: !close { source: !pick { symbol: SPY } } }, period: 60 }
