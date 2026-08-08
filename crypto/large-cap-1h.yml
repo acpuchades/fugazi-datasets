@@ -8,6 +8,6 @@ sources:
       symbols:
         - BTCUSDT
         - ETHUSDT
-        - SOLUSDT
         - BNBUSDT
-        - XRPUSDT
+        - SOLUSDT
+        - TRXUSDT

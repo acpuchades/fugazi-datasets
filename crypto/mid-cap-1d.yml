@@ -8,13 +8,14 @@ interval: 1d
 sources:
   - binance-vision:
       symbols:
-        - XMRUSDT
         - LINKUSDT
         - XLMUSDT
         - BCHUSDT
         - GRAMUSDT
         - LTCUSDT
         - HBARUSDT
-        - SHIBUSDT
-        - AVAXUSDT
         - SUIUSDT
+        - AVAXUSDT
+        - SHIBUSDT
+        - XAUTUSDT
+        - BTCUSDT   # anchor for btc_sharpe*; not a mid-cap constituent
